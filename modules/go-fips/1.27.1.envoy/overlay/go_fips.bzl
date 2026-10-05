@@ -10,12 +10,12 @@ names exact build tool versions, so this selects a different architecture,
 never a different version.
 """
 
-GO_FIPS_VERSION = "1.24.12"
+GO_FIPS_VERSION = "1.27.1"
 
 # sha256 of https://go.dev/dl/go{version}.linux-{arch}.tar.gz
 _GO_FIPS_SHA256 = {
-    "amd64": "bddf8e653c82429aea7aec2520774e79925d4bb929fe20e67ecc00dd5af44c50",
-    "arm64": "4e02e2979e53b40f3666bba9f7e5ea0b99ea5156e0824b343fd054742c25498d",
+    "amd64": "63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445",
+    "arm64": "3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec",
 }
 
 # repository_ctx.os.arch reports the JVM's os.arch, which is "amd64" on x86_64
