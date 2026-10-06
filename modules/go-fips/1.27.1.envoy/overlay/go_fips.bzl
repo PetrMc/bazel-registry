@@ -12,9 +12,12 @@ never a different version.
 
 GO_FIPS_VERSION = "1.27.1"
 
+# The module source is the linux-amd64 tarball, so amd64 is reused from the module
+# root rather than fetched again, and source.json's integrity covers its hash.
+_MODULE_SOURCE_ARCH = "amd64"
+
 # sha256 of https://go.dev/dl/go{version}.linux-{arch}.tar.gz
 _GO_FIPS_SHA256 = {
-    "amd64": "63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445",
     "arm64": "3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec",
 }
 
@@ -60,11 +63,21 @@ def _go_fips_impl(repository_ctx):
             sorted(_GO_ARCH),
         ))
 
-    repository_ctx.download_and_extract(
-        url = "https://go.dev/dl/go{}.linux-{}.tar.gz".format(GO_FIPS_VERSION, go_arch),
-        sha256 = _GO_FIPS_SHA256[go_arch],
-        stripPrefix = "go",
-    )
+    if go_arch == _MODULE_SOURCE_ARCH:
+        # This module's own source is the linux-amd64 tarball, already extracted at the
+        # module root, so link it in instead of downloading the same bytes again. The
+        # overlay files are skipped: this repo gets its own BUILD.bazel below.
+        module_root = repository_ctx.path(Label("//:MODULE.bazel")).dirname
+        for entry in module_root.readdir():
+            if entry.basename.endswith((".bzl", ".bazel")):
+                continue
+            repository_ctx.symlink(entry, entry.basename)
+    else:
+        repository_ctx.download_and_extract(
+            url = "https://go.dev/dl/go{}.linux-{}.tar.gz".format(GO_FIPS_VERSION, go_arch),
+            sha256 = _GO_FIPS_SHA256[go_arch],
+            stripPrefix = "go",
+        )
     repository_ctx.file("BUILD.bazel", _BUILD_FILE)
 
 go_fips = repository_rule(
